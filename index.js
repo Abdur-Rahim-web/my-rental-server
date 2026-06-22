@@ -28,14 +28,28 @@ async function run() {
         // Server-side: API route to get properties by owner email
         app.get('/api/properties', async (req, res) => {
             try {
-                const { ownerEmail } = req.query; 
-                console.log("Searching in DB for:", ownerEmail);
+                const { ownerEmail } = req.query;
+                // console.log("Searching in DB for:", ownerEmail);
                 const query = ownerEmail ? { ownerEmail: ownerEmail } : {};
 
                 const result = await propertyCollection.find(query).toArray();
                 res.send(result);
             } catch (error) {
                 res.status(500).send({ message: "Error fetching properties", error });
+            }
+        });
+
+        // featured-properties
+        app.get('/api/featured-properties', async (req, res) => {
+            try {
+                const query = { status: 'Approved' };
+                const result = await propertyCollection
+                    .find(query)
+                    .limit(6)
+                    .toArray();
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching featured properties", error });
             }
         });
 
@@ -91,6 +105,9 @@ async function run() {
                 res.status(500).send({ message: "Error deleting property", error });
             }
         });
+
+
+
 
         await client.db("admin").command({ ping: 1 });
         console.log("You successfully connected to MongoDB!");
