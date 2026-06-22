@@ -53,6 +53,22 @@ async function run() {
             }
         });
 
+        // Property Details api 
+        app.get('/api/properties/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const query = { _id: new ObjectId(id) };
+                const result = await propertyCollection.findOne(query);
+
+                if (!result) {
+                    return res.status(404).send({ message: "Property not found in DB" });
+                }
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Invalid ID format or Server Error" });
+            }
+        });
+
         // Property Post Route
         app.post("/api/property", async (req, res) => {
             try {
