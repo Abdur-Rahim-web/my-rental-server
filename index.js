@@ -28,7 +28,7 @@ async function run() {
         // Server-side: API route to get properties by owner email
         app.get('/api/properties', async (req, res) => {
             try {
-                const { ownerEmail } = req.query; // ফ্রন্টএন্ড থেকে ইমেইল পাঠাতে হবে
+                const { ownerEmail } = req.query; 
                 console.log("Searching in DB for:", ownerEmail);
                 const query = ownerEmail ? { ownerEmail: ownerEmail } : {};
 
@@ -75,6 +75,7 @@ async function run() {
 
         // Delete Property Route (DELETE)
         app.delete("/api/properties/:id", async (req, res) => {
+            console.log("Delete route hit with ID:", req.params.id);
             try {
                 const id = req.params.id;
                 const query = { _id: new ObjectId(id) };
