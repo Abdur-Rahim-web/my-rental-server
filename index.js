@@ -25,6 +25,7 @@ async function run() {
         const database = client.db(process.env.DB_NAME);
         const propertyCollection = database.collection("property");
         const favoriteCollection = database.collection("favorites");
+        const bookingCollection = database.collection("bookings");
 
 
         //------------- properties related api------------------------
@@ -155,6 +156,21 @@ async function run() {
                 res.send(result);
             } catch (error) {
                 res.status(500).send({ message: "Error fetching favorites", error });
+            }
+        });
+
+        //------------- booking related api------------------------
+        app.post("/api/bookings", async (req, res) => {
+            try {
+                const bookingData = req.body;
+                const result = await bookingCollection.insertOne({
+                    ...bookingData,
+                    status: 'Pending',
+                    createdAt: new Date()
+                });
+                res.status(201).send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error saving booking", error });
             }
         });
 
