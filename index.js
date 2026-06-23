@@ -24,6 +24,10 @@ async function run() {
         await client.connect();
         const database = client.db(process.env.DB_NAME);
         const propertyCollection = database.collection("property");
+        const favoriteCollection = database.collection("favorites");
+
+
+        //------------- properties related api------------------------
 
         // Server-side: API route to get properties by owner email
         app.get('/api/properties', async (req, res) => {
@@ -123,7 +127,36 @@ async function run() {
         });
 
 
+        //------------- favorites related api------------------------
 
+        // post for add-favorites property
+        app.post("/api/favorites", async (req, res) => {
+            try {
+                const favoriteData = req.body;
+                const query = { propertyId: favoriteData.propertyId, userEmail: favoriteData.userEmail };
+                const existing = await favoriteCollection.findOne(query);
+
+                if (existing) {
+                    return res.status(400).send({ message: "Already in favorites" });
+                }
+
+                const result = await favoriteCollection.insertOne(favoriteData);
+                res.status(201).send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error adding to favorites", error });
+            }
+        });
+
+        // get for add-favorites property
+        app.get("/api/favorites/:email", async (req, res) => {
+            try {
+                const query = { userEmail: req.params.email };
+                const result = await favoriteCollection.find(query).toArray();
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching favorites", error });
+            }
+        });
 
         await client.db("admin").command({ ping: 1 });
         console.log("You successfully connected to MongoDB!");
