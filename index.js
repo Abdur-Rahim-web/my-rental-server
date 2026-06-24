@@ -26,6 +26,7 @@ async function run() {
         const propertyCollection = database.collection("property");
         const favoriteCollection = database.collection("favorites");
         const bookingCollection = database.collection("bookings");
+        const reviewCollection = database.collection("reviews");
 
 
         //------------- properties related api------------------------
@@ -179,7 +180,7 @@ async function run() {
         app.patch("/api/bookings/:id", async (req, res) => {
             try {
                 const id = req.params.id;
-                const { status } = req.body; 
+                const { status } = req.body;
                 const filter = { _id: new ObjectId(id) };
                 const updateDoc = {
                     $set: { status: status },
@@ -196,6 +197,37 @@ async function run() {
                 res.status(500).send({ message: "Error updating booking status", error });
             }
         });
+
+
+        //------------- review related api------------------------
+
+        // Get reviews for a specific property
+        app.get("/api/reviews/:propertyId", async (req, res) => {
+            try {
+                const query = { propertyId: req.params.propertyId };
+                const result = await reviewCollection.find(query).toArray();
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching reviews", error });
+            }
+        });
+
+        // Post a new review
+        app.post("/api/reviews", async (req, res) => {
+            try {
+                const reviewData = req.body;
+                const result = await reviewCollection.insertOne({
+                    ...reviewData,
+                    date: new Date()
+                });
+                res.status(201).send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error saving review", error });
+            }
+        });
+
+
+
 
         await client.db("admin").command({ ping: 1 });
         console.log("You successfully connected to MongoDB!");
