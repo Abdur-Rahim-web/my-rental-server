@@ -174,6 +174,29 @@ async function run() {
             }
         });
 
+
+        // Update Booking Status Route
+        app.patch("/api/bookings/:id", async (req, res) => {
+            try {
+                const id = req.params.id;
+                const { status } = req.body; 
+                const filter = { _id: new ObjectId(id) };
+                const updateDoc = {
+                    $set: { status: status },
+                };
+
+                const result = await bookingCollection.updateOne(filter, updateDoc);
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).send({ message: "Booking not found" });
+                }
+
+                res.send({ message: "Booking status updated successfully", result });
+            } catch (error) {
+                res.status(500).send({ message: "Error updating booking status", error });
+            }
+        });
+
         await client.db("admin").command({ ping: 1 });
         console.log("You successfully connected to MongoDB!");
     } catch (err) {
