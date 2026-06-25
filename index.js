@@ -160,6 +160,18 @@ async function run() {
             }
         });
 
+        //  for delete favorites 
+        app.delete("/api/favorites/:id", async (req, res) => {
+            try {
+                const id = req.params.id;
+                const query = { _id: new ObjectId(id) };
+                const result = await favoriteCollection.deleteOne(query);
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error deleting favorite", error });
+            }
+        });
+
         //------------- booking related api------------------------
         app.post("/api/bookings", async (req, res) => {
             try {
@@ -195,6 +207,22 @@ async function run() {
                 res.send({ message: "Booking status updated successfully", result });
             } catch (error) {
                 res.status(500).send({ message: "Error updating booking status", error });
+            }
+        });
+
+        // Get Booking Status Route
+        
+        app.get("/api/bookings/:email", async (req, res) => {
+            try {
+                const userEmail = req.params.email;
+                // console.log("Searching for bookings for email:", userEmail); 
+                const query = { userEmail: userEmail };
+                const result = await bookingCollection.find(query).toArray();
+
+                // console.log("Found bookings:", result); 
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching bookings", error });
             }
         });
 
