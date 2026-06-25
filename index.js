@@ -211,7 +211,7 @@ async function run() {
         });
 
         // Get Booking Status Route
-        
+
         app.get("/api/bookings/:email", async (req, res) => {
             try {
                 const userEmail = req.params.email;
@@ -251,6 +251,29 @@ async function run() {
                 res.status(201).send(result);
             } catch (error) {
                 res.status(500).send({ message: "Error saving review", error });
+            }
+        });
+
+
+        //------------- tenant dashboard overview related api------------------------
+        
+        app.get("/api/user/dashboard-stats/:email", async (req, res) => {
+            const email = req.params.email;
+            try {
+                const bookings = await bookingCollection.find({ userEmail: email }).toArray();
+                const favorites = await favoriteCollection.find({ userEmail: email }).toArray(); // 
+
+               
+                const activeRentals = bookings.filter(b => b.status === 'Approved');
+
+                res.json({
+                    totalBookings: bookings.length,
+                    favoritesCount: favorites.length,
+                    activeRentals: activeRentals.length,
+                    recentActivities: bookings.slice(-4).reverse()
+                });
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching stats" });
             }
         });
 
