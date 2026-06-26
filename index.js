@@ -227,6 +227,17 @@ async function run() {
         });
 
 
+        // Get All Booking Status Route
+app.get('/api/admin/bookings', async (req, res) => {
+    try {
+        const bookings = await database.collection("bookings").find().toArray();
+        res.send(bookings);
+    } catch (error) {
+        res.status(500).send({ message: "Error fetching all bookings" });
+    }
+});
+
+
         //------------- review related api------------------------
 
         // Get reviews for a specific property
