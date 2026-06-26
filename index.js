@@ -27,6 +27,7 @@ async function run() {
         const favoriteCollection = database.collection("favorites");
         const bookingCollection = database.collection("bookings");
         const reviewCollection = database.collection("reviews");
+        const usersCollection = database.collection("user");
 
 
         //------------- properties related api------------------------
@@ -228,14 +229,14 @@ async function run() {
 
 
         // Get All Booking Status Route
-app.get('/api/admin/bookings', async (req, res) => {
-    try {
-        const bookings = await database.collection("bookings").find().toArray();
-        res.send(bookings);
-    } catch (error) {
-        res.status(500).send({ message: "Error fetching all bookings" });
-    }
-});
+        app.get('/api/admin/bookings', async (req, res) => {
+            try {
+                const bookings = await database.collection("bookings").find().toArray();
+                res.send(bookings);
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching all bookings" });
+            }
+        });
 
 
         //------------- review related api------------------------
@@ -312,6 +313,34 @@ app.get('/api/admin/bookings', async (req, res) => {
                 res.send(result);
             } catch (error) {
                 res.status(500).send({ message: "Error updating role" });
+            }
+        });
+
+
+        //------------- Admin dashboard overview related api------------------------
+        app.get("/api/admin/overview", async (req, res) => {
+            try {
+                const totalUsers = await usersCollection.estimatedDocumentCount();
+                const totalProperties = await propertyCollection.estimatedDocumentCount();
+                const totalBookings = await bookingCollection.estimatedDocumentCount();
+
+                const earnings = await bookingCollection.aggregate([
+                    { $match: { status: "Approved" } },
+                    { $group: { _id: null, total: { $sum: "$amountPaid" } } }
+                ]).toArray();
+
+                const data = {
+                    totalUsers,
+                    totalProperties,
+                    totalBookings,
+                    totalEarnings: earnings.length > 0 ? earnings[0].total : 0
+                };
+
+                // console.log("Fetched Data:", data);  
+                res.send(data);
+            } catch (error) {
+                console.error("API Error:", error);
+                res.status(500).send({ message: "Error" });
             }
         });
 
