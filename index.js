@@ -358,24 +358,26 @@ async function run() {
         });
 
 
+        //------------- owner dashboard overview related api------------------------
+
         app.get("/api/owner/overview/:email", async (req, res) => {
             try {
                 const ownerEmail = req.params.email;
 
-                // ১. ওনারের সব বুকিং এবং প্রপার্টি সংগ্রহ
+                
                 const bookings = await bookingCollection.find({ ownerEmail: ownerEmail }).toArray();
                 const totalProperties = await propertyCollection.countDocuments({ ownerEmail: ownerEmail });
 
-                // ২. আর্নিংস এবং বুকিং গণনা (শুধু Approved)
+                
                 const approvedBookings = bookings.filter(b => b.status === "Approved");
                 const totalEarnings = approvedBookings.reduce((sum, b) => sum + (Number(b.amountPaid) || 0), 0);
 
-                // ৩. গত ১২ মাসের আর্নিংস জেনারেট করা
+                
                 const last12Months = Array.from({ length: 12 }, (_, i) => {
                     const d = new Date();
                     d.setMonth(d.getMonth() - i);
                     return d.toLocaleString('default', { month: 'short' });
-                }).reverse(); // জানুয়ারি থেকে ডিসেম্বর সাজানোর জন্য
+                }).reverse(); 
 
                 const monthlyMap = approvedBookings.reduce((acc, b) => {
                     const month = new Date(b.createdAt).toLocaleString('default', { month: 'short' });
@@ -385,7 +387,7 @@ async function run() {
 
                 const formattedMonthlyData = last12Months.map(month => ({
                     month,
-                    earnings: monthlyMap[month] || 0 // ডাটা না থাকলে 0 বসাবে
+                    earnings: monthlyMap[month] || 0 
                 }));
 
                 res.send({
