@@ -256,14 +256,14 @@ async function run() {
 
 
         //------------- tenant dashboard overview related api------------------------
-        
+
         app.get("/api/user/dashboard-stats/:email", async (req, res) => {
             const email = req.params.email;
             try {
                 const bookings = await bookingCollection.find({ userEmail: email }).toArray();
                 const favorites = await favoriteCollection.find({ userEmail: email }).toArray(); // 
 
-               
+
                 const activeRentals = bookings.filter(b => b.status === 'Approved');
 
                 res.json({
@@ -277,6 +277,32 @@ async function run() {
             }
         });
 
+
+        // --- All Users related API ---
+
+        app.get('/api/users', async (req, res) => {
+            try {
+                const users = await database.collection("user").find().toArray();
+                res.send(users);
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching users" });
+            }
+        });
+
+
+        app.patch('/api/users/role/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const { role } = req.body;
+                const result = await database.collection("user").updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: { role: role } }
+                );
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: "Error updating role" });
+            }
+        });
 
 
 
