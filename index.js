@@ -52,7 +52,7 @@ async function run() {
                 const { location, type, sort } = req.query;
                 let query = {};
 
-                // লোকেশন এর জন্য Regex আরও শক্তিশালী করা হলো
+                
                 if (location) {
                     query.location = { $regex: location, $options: 'i' };
                 }
@@ -65,7 +65,7 @@ async function run() {
                 if (sort === "price-low") sortOption.rent = 1;
                 if (sort === "price-high") sortOption.rent = -1;
 
-                // ডিবাগ লগ
+                
                 console.log("MongoDB Query:", query);
                 const properties = await propertyCollection.find(query).sort(sortOption).toArray();
                 console.log("Properties Found Count:", properties.length);
@@ -435,7 +435,7 @@ async function run() {
 
 
 
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("You successfully connected to MongoDB!");
     } catch (err) {
         console.error(err);
@@ -443,6 +443,3 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-});
