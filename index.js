@@ -46,6 +46,36 @@ async function run() {
             }
         });
 
+        // get properties for search
+        app.get("/api/properties", async (req, res) => {
+            try {
+                const { location, type, sort } = req.query;
+                let query = {};
+
+                // লোকেশন এর জন্য Regex আরও শক্তিশালী করা হলো
+                if (location) {
+                    query.location = { $regex: location, $options: 'i' };
+                }
+
+                if (type) {
+                    query.propertyType = type;
+                }
+
+                let sortOption = {};
+                if (sort === "price-low") sortOption.rent = 1;
+                if (sort === "price-high") sortOption.rent = -1;
+
+                // ডিবাগ লগ
+                console.log("MongoDB Query:", query);
+                const properties = await propertyCollection.find(query).sort(sortOption).toArray();
+                console.log("Properties Found Count:", properties.length);
+
+                res.send(properties);
+            } catch (error) {
+                res.status(500).send({ message: "Error fetching properties" });
+            }
+        });
+
         // featured-properties
         app.get('/api/featured-properties', async (req, res) => {
             try {
@@ -364,20 +394,20 @@ async function run() {
             try {
                 const ownerEmail = req.params.email;
 
-                
+
                 const bookings = await bookingCollection.find({ ownerEmail: ownerEmail }).toArray();
                 const totalProperties = await propertyCollection.countDocuments({ ownerEmail: ownerEmail });
 
-                
+
                 const approvedBookings = bookings.filter(b => b.status === "Approved");
                 const totalEarnings = approvedBookings.reduce((sum, b) => sum + (Number(b.amountPaid) || 0), 0);
 
-                
+
                 const last12Months = Array.from({ length: 12 }, (_, i) => {
                     const d = new Date();
                     d.setMonth(d.getMonth() - i);
                     return d.toLocaleString('default', { month: 'short' });
-                }).reverse(); 
+                }).reverse();
 
                 const monthlyMap = approvedBookings.reduce((acc, b) => {
                     const month = new Date(b.createdAt).toLocaleString('default', { month: 'short' });
@@ -387,7 +417,7 @@ async function run() {
 
                 const formattedMonthlyData = last12Months.map(month => ({
                     month,
-                    earnings: monthlyMap[month] || 0 
+                    earnings: monthlyMap[month] || 0
                 }));
 
                 res.send({
