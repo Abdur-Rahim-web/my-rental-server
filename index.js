@@ -19,15 +19,19 @@ const client = new MongoClient(uri, {
     }
 });
 
-async function run() {
-    try {
-        await client.connect();
-        console.log("You successfully connected to MongoDB!");
-    } catch (err) {
-        console.error("Database connection error:", err);
-    }
-}
-run();
+// async function run() {
+//     try {
+//         await client.connect();
+//         console.log("You successfully connected to MongoDB!");
+//     } catch (err) {
+//         console.error("Database connection error:", err);
+//     }
+// }
+// run();
+
+client.connect(() => {
+    console.log('connecting to MOngo db');
+}).catch(console.dir)
 
 
 const database = client.db(process.env.DB_NAME);
@@ -425,10 +429,8 @@ app.get("/api/owner/overview/:email", async (req, res) => {
 
 
 
-if (require.main === module) {
-    app.listen(port, () => {
-        console.log(`Server listening on port ${port}`);
-    });
-}
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
 
 module.exports = app;
