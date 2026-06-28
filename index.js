@@ -50,11 +50,11 @@ app.get('/api/properties', async (req, res) => {
         const { ownerEmail, location, type, sort } = req.query;
         let query = {};
 
-        
+
         if (ownerEmail) {
             query.ownerEmail = ownerEmail;
         } else {
-           
+
             if (location) query.location = { $regex: location, $options: 'i' };
             if (type) query.propertyType = type;
         }
@@ -277,6 +277,16 @@ app.get("/api/owner/bookings-requests/:email", async (req, res) => {
 
 
 //------------- review related api------------------------
+
+// All Reviews Related Get API
+app.get('/api/reviews', async (req, res) => {
+    try {
+        const reviews = await reviewCollection.find({ rating: 5 }).limit(4).toArray();
+        res.send(reviews);
+    } catch (error) {
+        res.status(500).send({ message: "Error fetching reviews" });
+    }
+});
 
 // Get reviews for a specific property
 app.get("/api/reviews/:propertyId", async (req, res) => {
